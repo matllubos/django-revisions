@@ -28,6 +28,14 @@ When in doubt, don't specify your own form and stick to the default: the AutoRev
 from django.contrib import admin
 from revisions.managers import LatestManager
 from django import forms
+from django.shortcuts import get_object_or_404
+from django.utils.encoding import force_unicode
+from django.utils.text import capfirst
+from django.template.response import TemplateResponse
+from django.utils.translation import ugettext_lazy as _
+from django.contrib.admin.util import unquote
+from django.http import Http404
+from django.core.exceptions import ObjectDoesNotExist
 
 class AutoRevisionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -55,3 +63,92 @@ class VersionedAdmin(admin.ModelAdmin):
         Given a model instance save it to the database.
         """
         obj.revise()
+        
+
+class RevisionsHistoryVersionedAdmin(VersionedAdmin):       
+    change_form_template = 'admin/revisions_change_form.html'
+    
+    def revisions_history_view(self, request, object_id, extra_context=None):
+        "The 'revisions history' admin view for this model."
+        model = self.model
+        opts = model._meta
+        app_label = opts.app_label
+
+        obj = get_object_or_404(model, pk=unquote(object_id))
+        context = {
+            'title': _('Change history: %s') % force_unicode(obj),
+            'revision_list': obj.get_revisions(),
+            'module_name': capfirst(force_unicode(opts.verbose_name_plural)),
+            'object': obj,
+            'app_label': app_label,
+            'opts': opts,
+        }
+        context.update(extra_context or {})
+        return TemplateResponse(request, self.object_history_template or [
+            "admin/%s/%s/object_revisions_history.html" % (app_label, opts.object_name.lower()),
+            "admin/%s/object_revisions_history.html" % app_label,
+            "admin/object_revisions_history.html"
+        ], context, current_app=self.admin_site.name)
+        
+        
+    def revisions_diff_view(self, request, object_id, diff_object_id, extra_context=None):
+        "The 'revisions history' admin view for this model."
+        model = self.model
+        opts = model._meta
+        app_label = opts.app_label
+
+
+
+
+        
+        try:
+            obj = model.objects.get(pk=unquote(diff_object_id))
+        except ObjectDoesNotExist:
+            raise Http404('No %s matches the given query.' % model._meta.object_name)
+                
+        diff_list = []
+        for field in model._meta.fields:
+            fromText = unicode(getattr(obj, field.name))
+            if obj.get_revisions().prev:
+                toText = unicode(getattr(obj.get_revisions().prev, field.name))
+                diff_list.append({
+                                  'name': field.verbose_name,                       
+                                  'diff': obj.get_revisions().prev.show_diff_to(obj, field.name),
+                                  'from': fromText,
+                                  'to': toText
+                                  })
+            else:
+                diff_list.append({
+                                  'name': field.verbose_name,                       
+                                  'from': '',
+                                  'to': fromText,
+                                  'diff': '<ins style="background:#e6ffe6;">%s</ins>' % fromText
+                                  }) 
+        
+        
+        context = {
+            'title': _('Change history: %s') % force_unicode(obj),
+            'diff_list': diff_list,
+            'module_name': capfirst(force_unicode(opts.verbose_name_plural)),
+            'object': obj,
+            'app_label': app_label,
+            'opts': opts,
+        }
+        context.update(extra_context or {})
+        return TemplateResponse(request, self.object_history_template or [
+            "admin/%s/%s/object_diff.html" % (app_label, opts.object_name.lower()),
+            "admin/%s/object_diff.html" % app_label,
+            "admin/object_diff.html"
+        ], context, current_app=self.admin_site.name)
+        
+    def get_urls(self):
+        urls = super(RevisionsHistoryVersionedAdmin, self).get_urls()
+        from django.conf.urls import patterns, url
+        
+        info = self.model._meta.app_label, self.model._meta.module_name
+        
+        my_urls = patterns('',
+            url(r'^(.+)/revisions-history/$', self.admin_site.admin_view(self.revisions_history_view), name='%s_%s_history' % info),
+            url(r'^(.+)/revisions-history/(.+)/$', self.admin_site.admin_view(self.revisions_diff_view), name='%s_%s_history_diff' % info)
+        )
+        return my_urls + urls

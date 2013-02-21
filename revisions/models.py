@@ -8,6 +8,8 @@ from django.utils.translation import ugettext as _
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import IntegrityError
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import User
+from django.utils.translation import ugettext_lazy as _
 from revisions import managers, utils
 import inspect
 
@@ -123,18 +125,25 @@ class VersionedModelBase(models.Model, utils.ClonableMixin):
             return revert_to_obj.revise()
             
     def get_latest_revision(self):
-        return self.get_revisions().order_by('-' + self.comparator)[0]
+        print self.comparator
+        return self.get_revisions().order_by('-' + self.comparator_name)[0]
     
     def make_current_revision(self):
         if not self.check_if_latest_revision():
             self.save()
 
     def show_diff_to(self, to, field):
-        frm = unicode(getattr(self, field)).split()
-        to = unicode(getattr(to, field)).split()
-        differ = difflib.HtmlDiff()
-        return differ.make_table(frm, to)
+        lFromText = unicode(getattr(self, field))
+        lToText = unicode(getattr(to, field))
 
+        
+        from diff_match_patch.diff_match_patch import diff_match_patch
+
+        lDiffClass = diff_match_patch()
+        lDiffs = lDiffClass.diff_main(lFromText, lToText)
+        return lDiffClass.diff_prettyHtml(lDiffs)
+        
+        
     def _get_unique_checks(self, exclude=[]):
         # for parity with Django's unique_together notation shortcut
         def parse_shortcut(unique_together):
@@ -260,6 +269,8 @@ class VersionedModelBase(models.Model, utils.ClonableMixin):
 
 class VersionedModel(VersionedModelBase):
     vid = models.AutoField(primary_key=True)
+    vdatetime = models.DateTimeField(auto_now=True, editable=False)
+    vuser = models.ForeignKey(User, null=True, blank=True, editable=False, related_name="%(app_label)s_%(class)s_vuser")
     
     class Meta:
         abstract = True

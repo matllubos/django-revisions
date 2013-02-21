@@ -1,0 +1,24 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="../../../../../">{% trans 'Home' %}</a> &rsaquo; 
+    <a href="../../../../">{{ app_label|capfirst }}</a> &rsaquo; 
+    <a href="../../../">{{ module_name }}</a> &rsaquo; 
+    <a href="../../">{{ object|truncatewords:"18" }}</a> &rsaquo; 
+    <a href="../">{% trans 'Revisions history' %}</a> &rsaquo; 
+    {{ object|truncatewords:"18" }}
+</div>
+{% endblock %}
+
+{% block content %}
+	<div id="content-main">
+		<table>
+			<tr><th>{% trans 'Field' %}</th><th>{% trans 'From' %}</th><th> {% trans 'To' %}</th><th> {% trans 'Diff' %}</th></tr>
+		{% for diff in diff_list %}
+			<tr><th>{{ diff.name }}</th><td>{{ diff.from }}</td><td>{{ diff.to }}</td><td>{{ diff.diff|safe }}</td></tr>
+		{% endfor %}
+		</table>
+	</div>
+{% endblock %}
