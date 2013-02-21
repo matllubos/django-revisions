@@ -125,7 +125,6 @@ class VersionedModelBase(models.Model, utils.ClonableMixin):
             return revert_to_obj.revise()
             
     def get_latest_revision(self):
-        print self.comparator
         return self.get_revisions().order_by('-' + self.comparator_name)[0]
     
     def make_current_revision(self):
@@ -238,7 +237,7 @@ class VersionedModelBase(models.Model, utils.ClonableMixin):
         self.validate_bundle()
         return self.clone()
 
-    def save(self, *vargs, **kwargs):       
+    def save(self, *vargs, **kwargs):    
         # The first revision of a piece of content won't have a bundle id yet, 
         # and because the object isn't persisted in the database, there's no 
         # primary key either, so we use a UUID as the bundle ID.

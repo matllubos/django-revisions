@@ -1,7 +1,11 @@
 # encoding: utf-8
 
 from datetime import datetime
+from django.utils.encoding import force_unicode
+
 from django.db import models
+from django.db.models.aggregates import Max
+
 import inspect
 
 
@@ -36,12 +40,10 @@ class LatestManager(models.Manager):
         # to multiple queries or working entirely with raw SQL.
         comparator_name = base.get_comparator_name()  
         comparator_table = get_table_for_field(qs.query.model, comparator_name)
-        where = '{comparator_table}.{comparator} = (SELECT MAX({comparator}) FROM {table} as sub WHERE {table}.cid = sub.cid)'.format(
-            table=base_table,
-            comparator=comparator_name,
-            comparator_table=comparator_table)
+ 
+ 
+        qs = qs.filter(pk__in = qs.values('cid').annotate(max_vid=Max(comparator_name)).values_list('max_vid', flat=True))
         
-        qs = qs.extra(where=[where])
         return qs
 
     def get_query_set(self):              
