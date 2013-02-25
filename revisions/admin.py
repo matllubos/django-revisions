@@ -55,7 +55,7 @@ class RevisionForm(AutoRevisionForm):
         del self.cleaned_data['small_change']
         return self.cleaned_data
 
-class VersionedAdmin(admin.ModelAdmin):
+class VersionedAdminMixin(object):
     form = AutoRevisionForm
     
     def save_model(self, request, obj, form, change):
@@ -65,7 +65,7 @@ class VersionedAdmin(admin.ModelAdmin):
         obj.revise()
         
 
-class RevisionsHistoryVersionedAdmin(VersionedAdmin):       
+class RevisionsHistoryVersionedAdminMixin(VersionedAdminMixin):       
     change_form_template = 'admin/revisions_change_form.html'
     
     def revisions_history_view(self, request, object_id, extra_context=None):
@@ -142,7 +142,7 @@ class RevisionsHistoryVersionedAdmin(VersionedAdmin):
         ], context, current_app=self.admin_site.name)
         
     def get_urls(self):
-        urls = super(RevisionsHistoryVersionedAdmin, self).get_urls()
+        urls = super(RevisionsHistoryVersionedAdminMixin, self).get_urls()
         from django.conf.urls import patterns, url
         
         info = self.model._meta.app_label, self.model._meta.module_name
@@ -152,3 +152,7 @@ class RevisionsHistoryVersionedAdmin(VersionedAdmin):
             url(r'^(.+)/revisions-history/(.+)/$', self.admin_site.admin_view(self.revisions_diff_view), name='%s_%s_history_diff' % info)
         )
         return my_urls + urls
+    
+    
+class RevisionsHistoryVersionedAdmin(RevisionsHistoryVersionedAdminMixin, admin.ModelAdmin):
+    pass
