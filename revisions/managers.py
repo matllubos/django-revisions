@@ -41,7 +41,6 @@ class LatestManager(models.Manager):
         comparator_name = base.get_comparator_name()  
         comparator_table = get_table_for_field(qs.query.model, comparator_name)
  
- 
         qs = qs.filter(pk__in = qs.values('cid').annotate(max_vid=Max(comparator_name)).values_list('max_vid', flat=True))
         
         return qs

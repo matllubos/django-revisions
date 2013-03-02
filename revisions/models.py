@@ -235,6 +235,8 @@ class VersionedModelBase(models.Model, utils.ClonableMixin):
 
     def revise(self):
         self.validate_bundle()
+        if not self.pk:
+            return self.save()
         return self.clone()
 
     def save(self, *vargs, **kwargs):    

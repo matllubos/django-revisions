@@ -30,5 +30,7 @@ class ClonableMixin(object):
             destination = getattr(duplicate, field.attname)
             for item in source.all():
                 destination.add(item)
-
+        
+        print 'tady je ten problém'
+        self.pk = duplicate.pk
         return duplicate

@@ -62,6 +62,7 @@ class VersionedAdminMixin(object):
         """
         Given a model instance save it to the database.
         """
+        print 'volám revise'
         obj.revise()
         
 
