@@ -31,6 +31,7 @@ class ClonableMixin(object):
             for item in source.all():
                 destination.add(item)
         
-        print 'tady je ten problém'
+        print 'ukládám'
         self.pk = duplicate.pk
+        print duplicate
         return duplicate

@@ -36,6 +36,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin.util import unquote
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist
+from django.forms.models import BaseModelFormSet
 
 class AutoRevisionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -62,12 +63,12 @@ class VersionedAdminMixin(object):
         """
         Given a model instance save it to the database.
         """
-        print 'volám revise'
         obj.revise()
         
 
 class RevisionsHistoryVersionedAdminMixin(VersionedAdminMixin):       
     change_form_template = 'admin/revisions_change_form.html'
+    diff_ignored_fields = ['vid', 'vuser', 'vdatetime','cid']
     
     def revisions_history_view(self, request, object_id, extra_context=None):
         "The 'revisions history' admin view for this model."
@@ -109,9 +110,13 @@ class RevisionsHistoryVersionedAdminMixin(VersionedAdminMixin):
                 
         diff_list = []
         for field in model._meta.fields:
-            fromText = unicode(getattr(obj, field.name))
+            if field.name in self.diff_ignored_fields:
+                continue
+            
+            
+            toText = unicode(getattr(obj, field.name))
             if obj.get_revisions().prev:
-                toText = unicode(getattr(obj.get_revisions().prev, field.name))
+                fromText = unicode(getattr(obj.get_revisions().prev, field.name))
                 diff_list.append({
                                   'name': field.verbose_name,                       
                                   'diff': obj.get_revisions().prev.show_diff_to(obj, field.name),
@@ -122,7 +127,7 @@ class RevisionsHistoryVersionedAdminMixin(VersionedAdminMixin):
                 diff_list.append({
                                   'name': field.verbose_name,                       
                                   'from': '',
-                                  'to': fromText,
+                                  'to': toText,
                                   'diff': '<ins style="background:#e6ffe6;">%s</ins>' % fromText
                                   }) 
         
@@ -157,3 +162,46 @@ class RevisionsHistoryVersionedAdminMixin(VersionedAdminMixin):
     
 class RevisionsHistoryVersionedAdmin(RevisionsHistoryVersionedAdminMixin, admin.ModelAdmin):
     pass
+
+
+
+from utilities.admin.reverse_inline import ReverseModelMixin, ReverseInlineModelAdmin, ReverseInlineFormSet
+
+class RevisionsReverseInlineFormSet(BaseModelFormSet):
+    model = None
+    parent_fk_name = ''
+    def __init__(self,
+                 data = None,
+                 files = None,
+                 instance = None,
+                 prefix = None,
+                 queryset = None,
+                 save_as_new = False):
+        
+        try:
+            object = getattr(instance, self.parent_fk_name)
+        except ObjectDoesNotExist:
+            object = None
+           
+         
+        if object:
+            object = object.get_latest_revision()
+            qs = self.model._default_manager.filter(pk = object.pk)
+        else:
+            qs = self.model._default_manager.none()
+            self.extra = 1
+        
+        super(RevisionsReverseInlineFormSet, self).__init__(data, files,
+                                                       prefix = prefix,
+                                                       queryset = qs)
+        for form in self.forms:
+            form.empty_permitted = False
+            
+
+class RevisionsReverseInlineModelAdmin(ReverseInlineModelAdmin):
+    def get_formset(self, request, obj = None, **kwargs):
+        kwargs['formset'] = RevisionsReverseInlineFormSet
+        return super(RevisionsReverseInlineModelAdmin, self).get_formset(request, obj, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        obj.revise()
