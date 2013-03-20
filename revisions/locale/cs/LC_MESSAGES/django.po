@@ -1,0 +1,72 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-03-17 20:49+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2\n"
+
+#: admin.py:81 admin.py:133
+msgid "Change history"
+msgstr "Historie změn"
+
+#: templates/admin/object_diff.html:6
+#: templates/admin/object_revisions_history.html:6
+msgid "Home"
+msgstr ""
+
+#: templates/admin/object_diff.html:10
+#: templates/admin/revisions_change_form.html:8
+msgid "Revisions history"
+msgstr "Historie verzí"
+
+#: templates/admin/object_diff.html:18
+msgid "Field"
+msgstr "Pole"
+
+#: templates/admin/object_diff.html:18
+msgid "From"
+msgstr "Z"
+
+#: templates/admin/object_diff.html:18
+msgid "To"
+msgstr "Na"
+
+#: templates/admin/object_diff.html:18
+#: templates/admin/object_revisions_history.html:24
+msgid "Diff"
+msgstr "Změna"
+
+#: templates/admin/object_revisions_history.html:10
+msgid "History"
+msgstr "Historie"
+
+#: templates/admin/object_revisions_history.html:22
+msgid "Date/time"
+msgstr "Datum/Čas"
+
+#: templates/admin/object_revisions_history.html:23
+msgid "User"
+msgstr "Uživatel"
+
+#: templates/admin/object_revisions_history.html:32
+msgid "Show diff"
+msgstr "Zobrazit změny"
+
+#: templates/admin/object_revisions_history.html:38
+msgid ""
+"This object doesn't have a change history. It probably wasn't added via this "
+"admin site."
+msgstr ""

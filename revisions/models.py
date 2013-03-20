@@ -132,8 +132,8 @@ class VersionedModelBase(models.Model, utils.ClonableMixin):
             self.save()
 
     def show_diff_to(self, to, field):
-        lFromText = unicode(getattr(self, field))
-        lToText = unicode(getattr(to, field))
+        lFromText = unicode(getattr(self, field) or '')
+        lToText = unicode(getattr(to, field) or '')
 
         
         from diff_match_patch.diff_match_patch import diff_match_patch

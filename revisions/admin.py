@@ -29,7 +29,7 @@ from django.contrib import admin
 from revisions.managers import LatestManager
 from django import forms
 from django.shortcuts import get_object_or_404
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_unicode, smart_unicode
 from django.utils.text import capfirst
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
@@ -65,6 +65,14 @@ class VersionedAdminMixin(object):
         """
         obj.revise()
         
+def smart_localized_unicode(val):
+    if val == None:
+        return ''
+    if isinstance(val, bool):
+        if val: return _('Yes')
+        return _('No')
+    
+    return smart_unicode(val)
 
 class RevisionsHistoryVersionedAdminMixin(VersionedAdminMixin):       
     change_form_template = 'admin/revisions_change_form.html'
@@ -78,7 +86,7 @@ class RevisionsHistoryVersionedAdminMixin(VersionedAdminMixin):
 
         obj = get_object_or_404(model, pk=unquote(object_id))
         context = {
-            'title': _('Change history: %s') % force_unicode(obj),
+            'title': '%s: %s' %(_('Change history'), force_unicode(obj)),
             'revision_list': obj.get_revisions(),
             'module_name': capfirst(force_unicode(opts.verbose_name_plural)),
             'object': obj,
@@ -99,9 +107,6 @@ class RevisionsHistoryVersionedAdminMixin(VersionedAdminMixin):
         opts = model._meta
         app_label = opts.app_label
 
-
-
-
         
         try:
             obj = model.objects.get(pk=unquote(diff_object_id))
@@ -114,9 +119,9 @@ class RevisionsHistoryVersionedAdminMixin(VersionedAdminMixin):
                 continue
             
             
-            toText = unicode(getattr(obj, field.name))
+            toText = smart_localized_unicode(getattr(obj, field.name))
             if obj.get_revisions().prev:
-                fromText = unicode(getattr(obj.get_revisions().prev, field.name))
+                fromText = smart_localized_unicode(getattr(obj.get_revisions().prev, field.name))
                 diff_list.append({
                                   'name': field.verbose_name,                       
                                   'diff': obj.get_revisions().prev.show_diff_to(obj, field.name),
@@ -133,7 +138,7 @@ class RevisionsHistoryVersionedAdminMixin(VersionedAdminMixin):
         
         
         context = {
-            'title': _('Change history: %s') % force_unicode(obj),
+            'title': '%s: %s' %(_('Change history'), force_unicode(obj)),
             'diff_list': diff_list,
             'module_name': capfirst(force_unicode(opts.verbose_name_plural)),
             'object': obj,

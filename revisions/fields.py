@@ -47,7 +47,6 @@ class ReversionsManyToManyField(models.ManyToManyField):
     
     def value_from_object(self, obj):
         "Returns the value of this field in the given model instance."       
-        print 'tady'
         rev_obj_pks = []
         for rev_obj in getattr(obj, self.attname).model.objects.filter(**{'%s__pk' % obj.__class__.__name__.lower(): obj.pk}):
             rev_obj_pks.append(rev_obj.get_latest_revision().pk)
