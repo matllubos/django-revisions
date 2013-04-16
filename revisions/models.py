@@ -73,7 +73,7 @@ class VersionedModelBase(models.Model, utils.ClonableMixin):
         return self._base_model._meta.db_table
 
     # content bundle id
-    cid = models.CharField(max_length=36, editable=False, null=True, db_index=True)
+    cid = models.CharField(max_length=36, editable=False, null=True, db_index=True, verbose_name=_('ID'))
     
     # managers
     latest = managers.LatestManager()

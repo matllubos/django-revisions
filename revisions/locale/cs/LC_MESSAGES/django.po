@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-03-17 20:49+0100\n"
+"POT-Creation-Date: 2013-04-16 21:08+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,9 +18,25 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2\n"
 
-#: admin.py:81 admin.py:133
+#: admin.py:72
+msgid "Yes"
+msgstr ""
+
+#: admin.py:73
+msgid "No"
+msgstr ""
+
+#: admin.py:89 admin.py:141
 msgid "Change history"
 msgstr "Historie změn"
+
+#: models.py:76
+msgid "ID"
+msgstr ""
+
+#: models.py:273
+msgid "Last changed"
+msgstr "Poslední změna"
 
 #: templates/admin/object_diff.html:6
 #: templates/admin/object_revisions_history.html:6
