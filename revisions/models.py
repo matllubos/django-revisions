@@ -270,7 +270,7 @@ class VersionedModelBase(models.Model, utils.ClonableMixin):
 
 class VersionedModel(VersionedModelBase):
     vid = models.AutoField(primary_key=True)
-    vdatetime = models.DateTimeField(auto_now=True, editable=False)
+    vdatetime = models.DateTimeField(_(u'Last changed'), auto_now=True, editable=False)
     vuser = models.ForeignKey(User, null=True, blank=True, editable=False, related_name="%(app_label)s_%(class)s_vuser")
     
     class Meta:
